@@ -13,6 +13,11 @@ import {
 import { createServerSupabaseClient } from "@/lib/supabase/ssr/server";
 import { signOutAction } from "../auth/actions";
 
+// /profile is per-user (reads auth cookies) so it can't be statically
+// prerendered. Marking it dynamic also avoids Next.js trying to evaluate it
+// at build time when env vars aren't yet exposed to the build step.
+export const dynamic = "force-dynamic";
+
 export default async function ProfilePage() {
   const supabase = createServerSupabaseClient();
   const {
