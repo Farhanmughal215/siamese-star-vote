@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# Local logs from dev runs
+*.log
+
+# Claude Code workspace settings (machine-specific)
+.claude/settings.local.json

@@ -1,0 +1,83 @@
+-- Siamese Star Vote - seed data (clean ASCII version)
+-- Run AFTER the initial migration. Paste this whole file into a fresh
+-- Supabase SQL Editor query and click Run. No AI/Generate needed.
+
+insert into public.app_settings (setting_key, setting_value) values
+  ('heart_cooldown_hours', '5'),
+  ('coupon_expiry_days', '7'),
+  ('wheel_win_rate', '20')
+on conflict (setting_key) do nothing;
+
+insert into public.invitation_codes (code, label, is_active) values
+  ('SIAMESE-2026', 'Default launch code', true),
+  ('CAT-CAFE', 'Cafe walk-in code', true),
+  ('STAR-VOTE', 'Press / influencer code', true),
+  ('TEST-LOCAL', 'Local development testing', true)
+on conflict (code) do nothing;
+
+insert into public.cats (slug, name, title, personality, description, image_url, story_url) values
+  ('lucy', 'Lucy', 'The Angel Boy', 'Sweet & Gentle',
+   $$A halo-soft soul who greets every visitor with quiet eyes and a slow blink. Lucy curls into laps like he was made for them.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/lucy'),
+  ('charlie', 'Charlie', 'The Comedian King', 'Funny & Playful',
+   $$The cafe's resident jester. Charlie will absolutely steal your hair tie, your pen, and your heart - in that order.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png',
+   'https://siamesecatcafe.example.com/cats/charlie'),
+  ('feli', 'Feli', 'The Shy Princess', 'Calm & Elegant',
+   $$Watchful and refined, Feli observes the world from her velvet cushion and only graces the brave with her purr.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png',
+   'https://siamesecatcafe.example.com/cats/feli'),
+  ('cleo', 'Cleo', 'The First Lady', 'Graceful & Smart',
+   $$Composed, regal, impossibly poised. Cleo runs the cafe's social hour with the grace of a seasoned diplomat.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/cleo'),
+  ('siam', 'Siam', 'The Curious Explorer', 'Brave & Adventurous',
+   $$If there is a shelf, Siam has climbed it. If there is a box, Siam has investigated it twice. Born to chart new territory.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png',
+   'https://siamesecatcafe.example.com/cats/siam'),
+  ('muezza', 'Muezza', 'The Little Star', 'Cute & Mischievous',
+   $$A pocket-sized sparkle of trouble. Muezza was born to be photographed and absolutely knows it.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png',
+   'https://siamesecatcafe.example.com/cats/muezza'),
+  ('comet', 'Comet', 'The Softie', 'Loves Cuddles',
+   $$A cloud with whiskers. Comet's superpower is melting straight into your arms within four seconds flat.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/comet'),
+  ('malee', 'Malee', 'The Talkative', 'Loves Attention',
+   $$Malee has a lot to say and absolutely will say it. Bring snacks, bring patience, bring an audience.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png',
+   'https://siamesecatcafe.example.com/cats/malee'),
+  ('lila', 'Lila', 'The Independent', 'Confident & Cool',
+   $$Lila walks alone by choice, not by chance. Earn her trust and you have earned a quiet, unshakable friend.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png',
+   'https://siamesecatcafe.example.com/cats/lila'),
+  ('luca', 'Luca', 'The Brave Heart', 'Strong & Loyal',
+   $$Guardian of the front window. Luca was rescued from the street and has been protecting his family ever since.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/luca'),
+  ('pho', 'Pho', 'The Sweetheart', 'Kind & Gentle',
+   $$Pho greets every cat and every human with the same patient warmth. The cafe's quiet healer.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png',
+   'https://siamesecatcafe.example.com/cats/pho'),
+  ('mia', 'Mia', 'The Foodie', 'Always Hungry',
+   $$Mia has a sixth sense for treat jars. Approach with snacks and prepare for full-court diplomatic negotiation.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png',
+   'https://siamesecatcafe.example.com/cats/mia'),
+  ('nina', 'Nina', 'The Dancer', 'Playful & Energetic',
+   $$Spins, leaps, twirls. Nina turns every laser-pointer game into a one-cat ballet.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/nina'),
+  ('mira', 'Mira', 'The Dreamer', 'Calm & Thoughtful',
+   $$Mira spends her afternoons watching the rain. A quiet philosopher with very strong opinions about sunbeams.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png',
+   'https://siamesecatcafe.example.com/cats/mira'),
+  ('flow', 'Flow', 'The Queen', 'Elegant & Regal',
+   $$Flow holds court from the highest shelf. Subjects may approach if invited, and only if their hands are clean.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png',
+   'https://siamesecatcafe.example.com/cats/flow'),
+  ('soul', 'Soul', 'The Protector', 'Strong & Caring',
+   $$Soul keeps watch over the youngest kittens. Big heart, bigger paws, biggest sense of duty.$$,
+   'https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png',
+   'https://siamesecatcafe.example.com/cats/soul')
+on conflict (slug) do nothing;

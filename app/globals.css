@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-cream text-brown font-body antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, rgba(187, 221, 211, 0.25), transparent 60%),
+      radial-gradient(1000px 600px at 110% 10%, rgba(231, 158, 174, 0.22), transparent 60%),
+      radial-gradient(800px 600px at 50% 110%, rgba(231, 158, 174, 0.15), transparent 60%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: #e79eae;
+    color: #fdf5ec;
+  }
+}
+
+@layer components {
+  /* Premium glass card surface */
+  .glass {
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.78) 0%,
+      rgba(255, 248, 239, 0.62) 100%
+    );
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  /* Collectible card surface with subtle inner glow */
+  .card-surface {
+    background: linear-gradient(180deg, #ffffff 0%, #fdf5ec 100%);
+    border: 1px solid rgba(90, 49, 20, 0.08);
+  }
+
+  /* Animated shimmer text — for the hero title */
+  .shimmer-text {
+    background: linear-gradient(
+      90deg,
+      #5a3114 0%,
+      #5a3114 40%,
+      #d57a8e 50%,
+      #5a3114 60%,
+      #5a3114 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 6s linear infinite;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brown px-7 py-3.5 font-semibold text-cream shadow-soft transition-all hover:bg-brown-400 hover:shadow-card active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-brown/20 bg-white/60 px-5 py-2.5 font-medium text-brown backdrop-blur transition-all hover:bg-white hover:border-brown/40;
+  }
+
+  .badge-rank {
+    @apply absolute top-3 left-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-brown text-cream font-display font-semibold shadow-soft;
+  }
+
+  /* Hide scrollbar but keep scroll */
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { scrollbar-width: none; }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Print: isolate the printable coupon so nothing else is sent to the printer */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  /* Hide everything by default — visibility (not display) keeps layout intact. */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Reveal the coupon and its contents. */
+  .printable-coupon,
+  .printable-coupon * {
+    visibility: visible;
+  }
+
+  /* Move the offscreen coupon back into view at the top-left of the page. */
+  .printable-coupon {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Inner card (positioned with margin) — let it scale naturally for print. */
+  .printable-coupon > div {
+    margin: 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 720 / 960;
+    max-width: 720px;
+  }
+}
