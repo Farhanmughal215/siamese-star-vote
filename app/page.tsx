@@ -48,6 +48,7 @@ import FortuneWheel from "@/components/FortuneWheel";
 import RewardResultModal from "@/components/RewardResultModal";
 import ShareCardPreview from "@/components/ShareCardPreview";
 import StorybookCatModal from "@/components/StorybookCatModal";
+import CatChat from "@/components/CatChat";
 import CatCooldownModal from "@/components/CatCooldownModal";
 import CatMemoryBook from "@/components/CatMemoryBook";
 import AmbientEffects from "@/components/AmbientEffects";
@@ -217,6 +218,9 @@ export default function Home() {
 
   // ---- Auxiliary modals ----
   const [profileCat, setProfileCat] = useState<Cat | null>(null);
+  // AI chat with a cat — opened from the storybook modal via the
+  // "Chat with [name]" button.
+  const [chatCat, setChatCat] = useState<Cat | null>(null);
   const [alreadyVotedOpen, setAlreadyVotedOpen] = useState(false);
   // The cat shown in the per-cat cooldown popup (when the user taps a
   // "Hearted" button while the 5-hour cooldown is still active).
@@ -1223,7 +1227,10 @@ export default function Home() {
         onClose={handleCloseProfile}
         onNavigate={handleNavigateProfile}
         onGiveHeart={handleGiveHeartFromStory}
+        onStartChat={setChatCat}
       />
+
+      <CatChat cat={chatCat} onClose={() => setChatCat(null)} />
 
       <CatMemoryBook
         open={memoryBookOpen}

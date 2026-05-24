@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ExternalLink,
   Heart,
+  MessageCircle,
   Quote,
   Sparkles,
   X,
@@ -43,6 +44,8 @@ type StorybookCatModalProps = {
   onGiveHeart: (cat: Cat) => void;
   /** Called when prev/next is clicked. Parent updates which cat is open. */
   onNavigate: (cat: Cat) => void;
+  /** Optional: opens the AI cat-chat modal for this cat. */
+  onStartChat?: (cat: Cat) => void;
 };
 
 // ---- Cat-to-cat page-turn variants ----
@@ -90,6 +93,7 @@ export default function StorybookCatModal({
   onClose,
   onGiveHeart,
   onNavigate,
+  onStartChat,
 }: StorybookCatModalProps) {
   const reducedMotion = useReducedMotion();
 
@@ -261,6 +265,9 @@ export default function StorybookCatModal({
                       affection={catAffection?.[String(cat.id)] ?? null}
                       voterFirstName={voterFirstName ?? null}
                       onGiveHeart={() => onGiveHeart(cat)}
+                      onStartChat={
+                        onStartChat ? () => onStartChat(cat) : undefined
+                      }
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -541,12 +548,14 @@ function ContentColumn({
   affection,
   voterFirstName,
   onGiveHeart,
+  onStartChat,
 }: {
   cat: Cat;
   hearted: boolean;
   affection: { heartsGiven: number; affectionLevel: number } | null;
   voterFirstName: string | null;
   onGiveHeart: () => void;
+  onStartChat?: () => void;
 }) {
   // Pick a dialogue line once per (cat, voter) — stable while the modal is
   // open, so the cat doesn't switch what they say between renders.
@@ -610,7 +619,12 @@ function ContentColumn({
       <StoryPreviewSection text={cat.description} />
 
       {/* Action area */}
-      <ActionArea cat={cat} hearted={hearted} onGiveHeart={onGiveHeart} />
+      <ActionArea
+        cat={cat}
+        hearted={hearted}
+        onGiveHeart={onGiveHeart}
+        onStartChat={onStartChat}
+      />
     </div>
   );
 }
@@ -784,10 +798,12 @@ function ActionArea({
   cat,
   hearted,
   onGiveHeart,
+  onStartChat,
 }: {
   cat: Cat;
   hearted: boolean;
   onGiveHeart: () => void;
+  onStartChat?: () => void;
 }) {
   return (
     <div className="mt-1 flex flex-col gap-2">
@@ -846,6 +862,24 @@ function ActionArea({
           <ExternalLink className="h-3.5 w-3.5 text-brown/60" strokeWidth={2.2} />
         </a>
       </div>
+
+      {/* Chat with the cat — magical little wow moment */}
+      {onStartChat && (
+        <button
+          type="button"
+          onClick={onStartChat}
+          className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full border border-pink-dark/25 bg-gradient-to-r from-pink-light/45 via-cream to-mint-light/40 px-4 py-2.5 text-[13px] font-semibold text-brown shadow-sm transition hover:border-pink-dark/45 hover:shadow-soft"
+        >
+          <MessageCircle
+            className="h-4 w-4 text-pink-dark transition group-hover:scale-110"
+            strokeWidth={2.4}
+          />
+          Chat with {cat.name}
+          <span className="rounded-full bg-pink-dark px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-cream">
+            New
+          </span>
+        </button>
+      )}
 
       {/* Support copy — single static line in both states; the cooldown
           countdown is only shown inside the CatCooldownModal. */}
