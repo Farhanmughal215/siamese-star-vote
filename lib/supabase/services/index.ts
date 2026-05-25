@@ -18,7 +18,11 @@ export {
   type VoterServiceProfile,
 } from "./voters";
 
-export { getCats, loadCatsAndCacheIds } from "./cats";
+export {
+  getCats,
+  getHeartCountsByCatId,
+  loadCatsAndCacheIds,
+} from "./cats";
 
 export {
   getActiveCooldownsForVoter,

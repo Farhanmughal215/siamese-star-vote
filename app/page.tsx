@@ -115,6 +115,7 @@ import {
   getActiveCooldownsForVoter,
   getAffectionForVoter,
   getCatUuidByName,
+  getHeartCountsByCatId,
   getMemoryBookData,
   getOrCreateVoter,
   loadCatsAndCacheIds,
@@ -158,8 +159,15 @@ import {
  *     description, image, storyUrl) comes from Supabase.
  *   - New admin-added cat → assign a synthetic id past the static range and
  *     fill in friendly defaults so the UI still renders nicely.
+ *
+ * Optional `heartCounts` (uuid → number) attaches the total hearts received
+ * to each cat so the home page can sort the grid as a live leaderboard.
  */
-function mergeLiveCats(rows: CatRow[], statics: Cat[]): Cat[] {
+function mergeLiveCats(
+  rows: CatRow[],
+  statics: Cat[],
+  heartCounts?: Map<string, number>,
+): Cat[] {
   const staticBySlug = new Map(
     statics.map((c) => [c.name.toLowerCase(), c] as const),
   );
@@ -186,6 +194,8 @@ function mergeLiveCats(rows: CatRow[], statics: Cat[]): Cat[] {
           "Quiet visitors",
           "Slow blinks",
         ],
+      hearts: heartCounts?.get(row.id) ?? 0,
+      slug: row.slug,
     };
   });
 }
@@ -344,13 +354,15 @@ export default function Home() {
         // Supabase rows (admin-editable; inactive cats already filtered out
         // by getCats). Merged with the static fallback so we still get
         // tags/quote/favoriteThings until those move to the DB.
-        const [supabaseCats, wheelCfg, seasonState] = await Promise.all([
-          loadCatsAndCacheIds(),
-          getWheelConfig(),
-          getSeasonState(),
-        ]);
+        const [supabaseCats, wheelCfg, seasonState, heartCounts] =
+          await Promise.all([
+            loadCatsAndCacheIds(),
+            getWheelConfig(),
+            getSeasonState(),
+            getHeartCountsByCatId(),
+          ]);
         if (supabaseCats && supabaseCats.length > 0) {
-          setLiveCats(mergeLiveCats(supabaseCats, allCats));
+          setLiveCats(mergeLiveCats(supabaseCats, allCats, heartCounts));
         }
         if (wheelCfg) {
           setLiveRewards(wheelCfg.rewards);
@@ -471,17 +483,27 @@ export default function Home() {
   }, []);
 
   // ---- Derived ----
+  // Always sorted by hearts descending so the grid acts as a live
+  // leaderboard. Ties broken by the original static `rank` so the order is
+  // stable when no one has voted yet.
   const visibleCats = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return liveCats.filter((cat) => {
-      const matchesQuery =
-        query.length === 0 ||
-        cat.name.toLowerCase().includes(query) ||
-        cat.title.toLowerCase().includes(query);
-      const matchesFilter =
-        activeFilter === "All" || cat.tags.includes(activeFilter);
-      return matchesQuery && matchesFilter;
-    });
+    return liveCats
+      .filter((cat) => {
+        const matchesQuery =
+          query.length === 0 ||
+          cat.name.toLowerCase().includes(query) ||
+          cat.title.toLowerCase().includes(query);
+        const matchesFilter =
+          activeFilter === "All" || cat.tags.includes(activeFilter);
+        return matchesQuery && matchesFilter;
+      })
+      .sort((a, b) => {
+        const ha = a.hearts ?? 0;
+        const hb = b.hearts ?? 0;
+        if (hb !== ha) return hb - ha;
+        return a.rank - b.rank;
+      });
   }, [liveCats, search, activeFilter]);
 
   const votedCat = useMemo(

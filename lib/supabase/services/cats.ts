@@ -49,3 +49,25 @@ export async function loadCatsAndCacheIds(): Promise<CatRow[] | null> {
   setCatIdMap(rows.map((r) => ({ slug: r.slug, id: r.id })));
   return rows;
 }
+
+/**
+ * Aggregate total hearts received per cat, keyed by the Supabase cat UUID.
+ * Powers the live leaderboard ordering on the home page. Returns an empty
+ * Map when Supabase is unavailable so callers can safely keep going.
+ */
+export async function getHeartCountsByCatId(): Promise<Map<string, number>> {
+  const client = getSupabaseClient();
+  if (!client) return new Map();
+
+  const { data, error } = await client.from("hearts").select("cat_id");
+  if (error) {
+    console.warn("[cats] getHeartCountsByCatId failed:", error.message);
+    return new Map();
+  }
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    counts.set(row.cat_id, (counts.get(row.cat_id) ?? 0) + 1);
+  }
+  return counts;
+}

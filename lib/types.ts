@@ -23,6 +23,13 @@ export type Cat = {
   quote: string;
   /** 4–5 short phrases shown as bulleted favorites in the Storybook modal. */
   favoriteThings: string[];
+  /**
+   * Total hearts received — populated when cats are loaded from Supabase.
+   * Used to sort the home-page grid as a live leaderboard.
+   */
+  hearts?: number;
+  /** Supabase slug — set when the cat row comes from Supabase. */
+  slug?: string;
 };
 
 export type EntryFormData = {
