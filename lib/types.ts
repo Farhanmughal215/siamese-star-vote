@@ -28,8 +28,19 @@ export type Cat = {
    * Used to sort the home-page grid as a live leaderboard.
    */
   hearts?: number;
+  /**
+   * Current position in the live leaderboard (1 = most hearts). Stamped
+   * after the hearts-descending sort so any UI showing rank can display
+   * the live position with ordinal formatting.
+   */
+  liveRank?: number;
   /** Supabase slug — set when the cat row comes from Supabase. */
   slug?: string;
+  /**
+   * Supabase UUID — stamped during merge so realtime heart events
+   * (`payload.new.cat_id`) can be matched back to a local Cat.
+   */
+  uuid?: string;
 };
 
 export type EntryFormData = {

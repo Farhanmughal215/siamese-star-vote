@@ -29,7 +29,7 @@
  * ──────────────────────────────────────────────────────────────────────
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import GameHeader from "@/components/GameHeader";
 import SeasonBanner, { VotingClosedNotice } from "@/components/SeasonBanner";
@@ -174,7 +174,7 @@ function mergeLiveCats(
   const maxStaticId = statics.reduce((m, c) => Math.max(m, c.id), 0);
   let nextSynth = maxStaticId + 1;
 
-  return rows.map((row) => {
+  const merged: Cat[] = rows.map((row) => {
     const fallback = staticBySlug.get(row.slug);
     return {
       id: fallback?.id ?? nextSynth++,
@@ -196,8 +196,43 @@ function mergeLiveCats(
         ],
       hearts: heartCounts?.get(row.id) ?? 0,
       slug: row.slug,
+      uuid: row.id,
     };
   });
+
+  return rerankByHearts(merged);
+}
+
+/**
+ * Sort a cats list by hearts desc (ties → static rank) and re-stamp the
+ * `liveRank` on each one. Shared between the initial merge and the
+ * realtime heart-delta updater.
+ */
+function rerankByHearts(cats: Cat[]): Cat[] {
+  return [...cats]
+    .sort((a, b) => {
+      const ha = a.hearts ?? 0;
+      const hb = b.hearts ?? 0;
+      if (hb !== ha) return hb - ha;
+      return a.rank - b.rank;
+    })
+    .map((c, i) => ({ ...c, liveRank: i + 1 }));
+}
+
+/**
+ * Apply a +1 or -1 delta to a specific cat (matched by Supabase uuid) and
+ * re-rank the whole list. Returns a new array reference so React picks it
+ * up. Bails out unchanged when no cat with that uuid is in the list.
+ */
+function withHeartDelta(cats: Cat[], catUuid: string, delta: number): Cat[] {
+  let touched = false;
+  const next = cats.map((c) => {
+    if (c.uuid !== catUuid) return c;
+    touched = true;
+    return { ...c, hearts: Math.max(0, (c.hearts ?? 0) + delta) };
+  });
+  if (!touched) return cats;
+  return rerankByHearts(next);
 }
 
 export default function Home() {
@@ -279,6 +314,18 @@ export default function Home() {
   // data/rewards.ts. Once loaded, every spin uses the live catalog.
   const [liveRewards, setLiveRewards] = useState<WheelRewardRow[] | null>(null);
   const [liveWinRate, setLiveWinRate] = useState<number | null>(null);
+
+  // ---- Rising cats ----
+  // Set of cat ids whose live rank just improved. Used to fire a sparkle
+  // burst on the climbing card. Entries auto-remove after ~2s.
+  const [risingCatIds, setRisingCatIds] = useState<Set<number>>(
+    () => new Set(),
+  );
+  // Snapshot of liveRanks from the previous render — diffed in an effect.
+  const previousRanksRef = useRef<Map<number, number>>(new Map());
+  // Skips the very first rank-diff so no false sparkles fire on page load
+  // when the static fallback gets replaced by real Supabase data.
+  const ranksSeededRef = useRef<boolean>(false);
 
   // ---- Current voting season state ----
   // `status` distinguishes three cases:
@@ -467,6 +514,88 @@ export default function Home() {
     );
     return () => window.clearTimeout(t);
   }, []);
+
+  // ---- Realtime heart events ----
+  // Subscribe once on mount: any heart INSERT or DELETE anywhere in the
+  // database bumps that cat's count locally, which re-sorts the grid and
+  // (via the rank-diff effect below) triggers a sparkle on a climber.
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const client = createBrowserSupabaseClient();
+
+    const channel = client
+      .channel("hearts-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "hearts" },
+        (payload) => {
+          const catUuid = (payload.new as { cat_id?: string })?.cat_id;
+          if (!catUuid) return;
+          setLiveCats((prev) => withHeartDelta(prev, catUuid, +1));
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "hearts" },
+        (payload) => {
+          const catUuid = (payload.old as { cat_id?: string })?.cat_id;
+          if (!catUuid) return;
+          setLiveCats((prev) => withHeartDelta(prev, catUuid, -1));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, []);
+
+  // ---- Rank-rise detection ----
+  // After each liveCats change, diff against the previous-rank snapshot.
+  // Cats whose liveRank just improved get added to risingCatIds; that flag
+  // is cleared 2 seconds later so the sparkle plays exactly once per rise.
+  useEffect(() => {
+    // The very first call after Supabase data lands has cats with liveRank
+    // stamped, but our previous snapshot is from the static fallback (no
+    // liveRank). Treating that as a "rise" would flood the page with false
+    // sparkles. Seed the ref on first stamped-liveRank pass instead.
+    const isStamped = liveCats.some((c) => c.liveRank !== undefined);
+    if (!ranksSeededRef.current && isStamped) {
+      previousRanksRef.current = new Map(
+        liveCats.map((c) => [c.id, c.liveRank ?? c.rank] as const),
+      );
+      ranksSeededRef.current = true;
+      return;
+    }
+
+    const prev = previousRanksRef.current;
+    const rising = new Set<number>();
+    for (const cat of liveCats) {
+      const oldRank = prev.get(cat.id);
+      const newRank = cat.liveRank;
+      if (oldRank !== undefined && newRank !== undefined && newRank < oldRank) {
+        rising.add(cat.id);
+      }
+    }
+    previousRanksRef.current = new Map(
+      liveCats.map((c) => [c.id, c.liveRank ?? c.rank] as const),
+    );
+
+    if (rising.size === 0) return;
+    setRisingCatIds((s) => {
+      const next = new Set(s);
+      for (const id of rising) next.add(id);
+      return next;
+    });
+    const timeout = window.setTimeout(() => {
+      setRisingCatIds((s) => {
+        const next = new Set(s);
+        for (const id of rising) next.delete(id);
+        return next;
+      });
+    }, 2000);
+    return () => window.clearTimeout(timeout);
+  }, [liveCats]);
 
   // ---- Helpers ----
   const showLoader = useCallback((text: string, ms: number) => {
@@ -1142,12 +1271,6 @@ export default function Home() {
         resultsCount={visibleCats.length}
       />
 
-      {/* Tiny ranking hint — explains why cats keep shuffling around */}
-      <p className="mx-auto -mt-1 mb-2 max-w-7xl px-4 text-center text-[11px] italic text-brown/55 sm:px-6 sm:text-[12px]">
-        🏆 Cats are ranked by hearts received — vote for your favourite to
-        push them up the leaderboard.
-      </p>
-
       {seasonStatus === "closed" && <VotingClosedNotice />}
 
       <CatGrid
@@ -1155,6 +1278,7 @@ export default function Home() {
         heartedCats={heartedCats}
         catAffection={catAffection}
         animatingCatId={giveHeartAnim?.cat.id ?? null}
+        risingCatIds={risingCatIds}
         onView={handleOpenProfile}
         onGiveHeart={handleGiveHeart}
         onResetFilters={handleResetFilters}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import type { Cat } from "@/lib/types";
+import { ordinal } from "@/lib/format";
 import type { HeartedCatsMap } from "@/lib/voterStorage";
 import {
   getAffectionLevelMeta,
@@ -351,8 +352,8 @@ function CatPortrait({
             className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-brown/40 to-transparent"
           />
 
-          {/* Candidate badge — premium pill */}
-          <CandidateBadge rank={cat.rank} />
+          {/* Candidate badge — premium pill, live leaderboard position */}
+          <CandidateBadge rank={cat.liveRank ?? cat.rank} />
         </div>
       </motion.div>
 
@@ -438,10 +439,10 @@ function CandidateBadge({ rank }: { rank: number }) {
       </span>
       <span className="flex items-baseline gap-1">
         <span className="font-display text-[9px] font-bold uppercase tracking-[0.18em] text-brown/65">
-          Candidate
+          Place
         </span>
         <span className="font-display text-[13px] font-bold text-brown">
-          #{rank}
+          {ordinal(rank)}
         </span>
       </span>
     </div>

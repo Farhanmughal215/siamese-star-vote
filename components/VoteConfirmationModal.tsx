@@ -5,6 +5,7 @@ import Image from "next/image";
 import { BookOpen, Check, Heart, Repeat, X } from "lucide-react";
 import { useEffect } from "react";
 import type { Cat } from "@/lib/types";
+import { ordinal } from "@/lib/format";
 
 type VoteConfirmationModalProps = {
   cat: Cat | null;
@@ -115,9 +116,9 @@ export default function VoteConfirmationModal({
                     sizes="(max-width: 640px) 128px, 180px"
                     className="object-cover"
                   />
-                  {/* Rank chip in corner of image */}
+                  {/* Rank chip in corner of image — live leaderboard position */}
                   <span className="absolute left-2 top-2 inline-flex items-center justify-center rounded-full bg-brown/85 px-2 py-0.5 font-display text-[11px] font-semibold text-cream backdrop-blur">
-                    #{cat.rank}
+                    {ordinal(cat.liveRank ?? cat.rank)}
                   </span>
                 </div>
 

@@ -7,6 +7,7 @@ import { memo, useRef } from "react";
 import SparkleBurst from "./SparkleBurst";
 import type { Cat } from "@/lib/types";
 import type { AffectionLevel } from "@/lib/catAffection";
+import { ordinal } from "@/lib/format";
 
 export type GiveHeartContext = {
   buttonRect: DOMRect;
@@ -24,6 +25,12 @@ type CatCardProps = {
   heartsGiven?: number;
   /** True while the page-level Give-Heart animation targets this card. */
   isAnimating?: boolean;
+  /**
+   * True when this cat just moved up in the live leaderboard. Triggers a
+   * celebratory sparkle burst + a soft mint glow that fade out
+   * automatically.
+   */
+  isRising?: boolean;
   onView: (cat: Cat) => void;
   /**
    * Called when the user clicks "Give Heart". The card passes its own
@@ -44,6 +51,7 @@ function CatCardInner({
   index,
   hearted,
   isAnimating = false,
+  isRising = false,
   onView,
   onGiveHeart,
 }: CatCardProps) {
@@ -132,10 +140,33 @@ function CatCardInner({
             }}
           />
         )}
+        {/* Rising-rank ring — softer mint tint, distinct from the
+            heart-click pink ring so the user can tell the two events apart. */}
+        {isRising && !isAnimating && (
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10 rounded-3xl ring-2 ring-mint-dark/60"
+            style={{
+              boxShadow:
+                "0 0 28px 4px rgba(143,196,179,0.55), inset 0 0 22px rgba(187,221,211,0.5)",
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 1, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 1.6,
+              ease: "easeOut",
+              times: [0, 0.15, 0.7, 1],
+            }}
+          />
+        )}
       </AnimatePresence>
 
-      {/* Ranking badge */}
-      <span className="badge-rank text-xs">#{cat.rank}</span>
+      {/* Ranking badge — uses live position (1st/2nd/3rd…) when available,
+          falls back to the static rank if liveRank hasn't been stamped. */}
+      <span className="badge-rank text-xs">
+        {ordinal(cat.liveRank ?? cat.rank)}
+      </span>
 
       {/* Top-right heart pill — always the same shape; the heart inside
           fills in when this cat is on the user's cooldown ("Hearted"). */}
@@ -186,6 +217,7 @@ function CatCardInner({
 
         {/* Sparkle burst — only renders during the animation, with the same delay */}
         {isAnimating && <SparkleBurst delay={REACT_DELAY_S} />}
+        {isRising && !isAnimating && <SparkleBurst />}
       </button>
 
       {/* Body — compact, tighter padding for 5-up fit */}

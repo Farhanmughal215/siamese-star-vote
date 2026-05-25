@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { Search, Trophy, X } from "lucide-react";
 import { FILTER_TAGS } from "@/data/cats";
 import type { FilterTag } from "@/lib/types";
 
@@ -55,10 +55,19 @@ export default function SearchAndFilters({
           )}
         </label>
 
-        {/* Results count */}
-        <p className="hidden text-xs font-semibold uppercase tracking-wider text-brown/55 sm:block">
-          {resultsCount} {resultsCount === 1 ? "cat" : "cats"}
-        </p>
+        {/* Results count + ranking hint chip */}
+        <div className="flex items-center gap-2">
+          <p className="hidden text-xs font-semibold uppercase tracking-wider text-brown/55 sm:block">
+            {resultsCount} {resultsCount === 1 ? "cat" : "cats"}
+          </p>
+          <span
+            title="Cats are ordered by total hearts received. Vote to climb the leaderboard."
+            className="inline-flex items-center gap-1 rounded-full bg-pink-light/40 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-pink-dark"
+          >
+            <Trophy className="h-3 w-3" strokeWidth={2.6} />
+            Ranked by hearts
+          </span>
+        </div>
       </div>
 
       {/* Filter chips — horizontally scrollable on small screens */}

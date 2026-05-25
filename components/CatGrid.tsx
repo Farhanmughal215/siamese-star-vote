@@ -18,6 +18,11 @@ type CatGridProps = {
   catAffection?: AffectionMap;
   /** Cat currently being animated into a Give-Heart sequence (if any). */
   animatingCatId?: number | null;
+  /**
+   * Cats whose live rank just improved — drives the celebratory sparkle
+   * burst on the climbing card.
+   */
+  risingCatIds?: Set<number>;
   onView: (cat: Cat) => void;
   onGiveHeart: (cat: Cat, ctx?: GiveHeartContext) => void;
   onResetFilters?: () => void;
@@ -28,6 +33,7 @@ export default function CatGrid({
   heartedCats,
   catAffection,
   animatingCatId = null,
+  risingCatIds,
   onView,
   onGiveHeart,
   onResetFilters,
@@ -43,7 +49,7 @@ export default function CatGrid({
       ) : (
         <motion.div
           layout
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-5 2xl:grid-cols-5"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-5"
         >
           <AnimatePresence mode="popLayout">
             {cats.map((cat, i) => {
@@ -65,6 +71,7 @@ export default function CatGrid({
                     affectionLevel={affectionEntry?.affectionLevel ?? 0}
                     heartsGiven={affectionEntry?.heartsGiven ?? 0}
                     isAnimating={animatingCatId === cat.id}
+                    isRising={!!risingCatIds?.has(cat.id)}
                     onView={onView}
                     onGiveHeart={onGiveHeart}
                   />
