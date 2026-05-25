@@ -1142,6 +1142,12 @@ export default function Home() {
         resultsCount={visibleCats.length}
       />
 
+      {/* Tiny ranking hint — explains why cats keep shuffling around */}
+      <p className="mx-auto -mt-1 mb-2 max-w-7xl px-4 text-center text-[11px] italic text-brown/55 sm:px-6 sm:text-[12px]">
+        🏆 Cats are ranked by hearts received — vote for your favourite to
+        push them up the leaderboard.
+      </p>
+
       {seasonStatus === "closed" && <VotingClosedNotice />}
 
       <CatGrid

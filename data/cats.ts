@@ -1,11 +1,35 @@
 import type { Cat, FilterTag } from "@/lib/types";
 
-const IMG_1 = "https://media.ourwebprojects.pro/wp-content/uploads/2026/05/1.png";
-const IMG_2 = "https://media.ourwebprojects.pro/wp-content/uploads/2026/05/2.png";
-const IMG_3 = "https://media.ourwebprojects.pro/wp-content/uploads/2026/05/3.png";
-
-const PLACEHOLDER_IMAGES = [IMG_1, IMG_2, IMG_3];
-const pickImage = (index: number) => PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length];
+/**
+ * Cat artwork — keyed by lowercase name (matches the Supabase slug). These
+ * are the same URLs sitting in the live `cats.image_url` column; we keep
+ * the static copy so the home page renders correctly on first paint
+ * (before Supabase responds) and when Supabase isn't configured.
+ */
+const CAT_IMAGES: Record<string, string> = {
+  lucy: "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Lucy.png",
+  charlie:
+    "https://media.ourwebprojects.pro/wp-content/uploads/2026/01/Charlie-Cat.webp",
+  feli: "https://media.ourwebprojects.pro/wp-content/uploads/2026/04/Feli.webp",
+  cleo: "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Cleo.png",
+  siam: "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Siam.webp",
+  muezza:
+    "https://media.ourwebprojects.pro/wp-content/uploads/2026/03/Muezza-cat.png",
+  comet:
+    "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Untitled-design-3.webp",
+  malee:
+    "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Malee.webp",
+  lila: "https://media.ourwebprojects.pro/wp-content/uploads/2026/01/Lila-Cat.png",
+  luca: "https://media.ourwebprojects.pro/wp-content/uploads/2026/01/Luca-Cat.png",
+  pho: "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Mia-1.webp",
+  mia: "https://media.ourwebprojects.pro/wp-content/uploads/2025/10/Mia.webp",
+  nina: "https://media.ourwebprojects.pro/wp-content/uploads/2026/05/Nina.webp",
+  mira: "https://media.ourwebprojects.pro/wp-content/uploads/2026/05/Mira-Cat.webp",
+  flow: "https://media.ourwebprojects.pro/wp-content/uploads/2026/01/Flow-cat.png",
+  soul: "https://media.ourwebprojects.pro/wp-content/uploads/2026/01/Soul-Cat.png",
+};
+const imageFor = (name: string): string =>
+  CAT_IMAGES[name.toLowerCase()] ?? "";
 
 // Mock external story domain — clearly placeholder so it's obvious where the
 // real story links will plug in later. Browsers will simply open the new tab;
@@ -34,7 +58,7 @@ export const cats: Cat[] = [
     personality: "Sweet & Gentle",
     description:
       "A halo-soft soul who greets every visitor with quiet eyes and a slow blink. Lucy curls into laps like he was made for them.",
-    image: pickImage(0),
+    image: imageFor("Lucy"),
     storyUrl: storyFor("Lucy"),
     tags: ["Gentle", "Calm"],
     quote: "Every heart you give makes my day softer.",
@@ -54,7 +78,7 @@ export const cats: Cat[] = [
     personality: "Funny & Playful",
     description:
       "The café's resident jester. Charlie will absolutely steal your hair tie, your pen, and your heart — in that order.",
-    image: pickImage(1),
+    image: imageFor("Charlie"),
     storyUrl: storyFor("Charlie"),
     tags: ["Funny", "Playful"],
     quote: "Life's better when you're laughing — preferably at me.",
@@ -74,7 +98,7 @@ export const cats: Cat[] = [
     personality: "Calm & Elegant",
     description:
       "Watchful and refined, Feli observes the world from her velvet cushion and only graces the brave with her purr.",
-    image: pickImage(2),
+    image: imageFor("Feli"),
     storyUrl: storyFor("Feli"),
     tags: ["Calm", "Elegant"],
     quote: "Speak softly, sit gently — and I might let you visit.",
@@ -94,7 +118,7 @@ export const cats: Cat[] = [
     personality: "Graceful & Smart",
     description:
       "Composed, regal, impossibly poised. Cleo runs the café's social hour with the grace of a seasoned diplomat.",
-    image: pickImage(0),
+    image: imageFor("Cleo"),
     storyUrl: storyFor("Cleo"),
     tags: ["Elegant", "Calm"],
     quote: "Hello, darling. Please follow café etiquette.",
@@ -114,7 +138,7 @@ export const cats: Cat[] = [
     personality: "Brave & Adventurous",
     description:
       "If there's a shelf, Siam has climbed it. If there's a box, Siam has investigated it — twice. Born to chart new territory.",
-    image: pickImage(1),
+    image: imageFor("Siam"),
     storyUrl: storyFor("Siam"),
     tags: ["Brave", "Playful"],
     quote: "There's a new corner today. I must investigate.",
@@ -134,7 +158,7 @@ export const cats: Cat[] = [
     personality: "Cute & Mischievous",
     description:
       "A pocket-sized sparkle of trouble. Muezza was born to be photographed and absolutely knows it.",
-    image: pickImage(2),
+    image: imageFor("Muezza"),
     storyUrl: storyFor("Muezza"),
     tags: ["Playful", "Funny"],
     quote: "If it sparkles, it's mine. Sorry, not sorry.",
@@ -154,7 +178,7 @@ export const cats: Cat[] = [
     personality: "Loves Cuddles",
     description:
       "A cloud with whiskers. Comet's superpower is melting straight into your arms within four seconds flat.",
-    image: pickImage(0),
+    image: imageFor("Comet"),
     storyUrl: storyFor("Comet"),
     tags: ["Gentle", "Calm"],
     quote: "Bring your arms. I'll do the rest.",
@@ -174,7 +198,7 @@ export const cats: Cat[] = [
     personality: "Loves Attention",
     description:
       "Malee has a lot to say and absolutely will say it. Bring snacks, bring patience, bring an audience.",
-    image: pickImage(1),
+    image: imageFor("Malee"),
     storyUrl: storyFor("Malee"),
     tags: ["Playful", "Funny"],
     quote: "Did I tell you about my morning? Let me tell you again.",
@@ -194,7 +218,7 @@ export const cats: Cat[] = [
     personality: "Confident & Cool",
     description:
       "Lila walks alone — by choice, not by chance. Earn her trust and you've earned a quiet, unshakable friend.",
-    image: pickImage(2),
+    image: imageFor("Lila"),
     storyUrl: storyFor("Lila"),
     tags: ["Brave", "Elegant"],
     quote: "I'll come when I'm ready. Maybe.",
@@ -214,7 +238,7 @@ export const cats: Cat[] = [
     personality: "Strong & Loyal",
     description:
       "Guardian of the front window. Luca was rescued from the street and has been protecting his family ever since.",
-    image: pickImage(0),
+    image: imageFor("Luca"),
     storyUrl: storyFor("Luca"),
     tags: ["Loyal", "Brave"],
     quote: "I keep watch. Always.",
@@ -234,7 +258,7 @@ export const cats: Cat[] = [
     personality: "Kind & Gentle",
     description:
       "Pho greets every cat and every human with the same patient warmth. The café's quiet healer.",
-    image: pickImage(1),
+    image: imageFor("Pho"),
     storyUrl: storyFor("Pho"),
     tags: ["Gentle", "Calm"],
     quote: "There's room on this cushion for both of us.",
@@ -254,7 +278,7 @@ export const cats: Cat[] = [
     personality: "Always Hungry",
     description:
       "Mia has a sixth sense for treat jars. Approach with snacks and prepare for full-court diplomatic negotiation.",
-    image: pickImage(2),
+    image: imageFor("Mia"),
     storyUrl: storyFor("Mia"),
     tags: ["Funny", "Playful"],
     quote: "Excuse me — is that for me? It is now.",
@@ -274,7 +298,7 @@ export const cats: Cat[] = [
     personality: "Playful & Energetic",
     description:
       "Spins, leaps, twirls — Nina turns every laser-pointer game into a one-cat ballet.",
-    image: pickImage(0),
+    image: imageFor("Nina"),
     storyUrl: storyFor("Nina"),
     tags: ["Playful"],
     quote: "Watch this leap. Then watch the next one.",
@@ -294,7 +318,7 @@ export const cats: Cat[] = [
     personality: "Calm & Thoughtful",
     description:
       "Mira spends her afternoons watching the rain. A quiet philosopher with very strong opinions about sunbeams.",
-    image: pickImage(1),
+    image: imageFor("Mira"),
     storyUrl: storyFor("Mira"),
     tags: ["Calm"],
     quote: "Rain is just the sky thinking out loud.",
@@ -314,7 +338,7 @@ export const cats: Cat[] = [
     personality: "Elegant & Regal",
     description:
       "Flow holds court from the highest shelf. Subjects may approach if invited — and only if their hands are clean.",
-    image: pickImage(2),
+    image: imageFor("Flow"),
     storyUrl: storyFor("Flow"),
     tags: ["Elegant"],
     quote: "Approach with clean hands and gentle praise.",
@@ -334,7 +358,7 @@ export const cats: Cat[] = [
     personality: "Strong & Caring",
     description:
       "Soul keeps watch over the youngest kittens. Big heart, bigger paws, biggest sense of duty.",
-    image: pickImage(0),
+    image: imageFor("Soul"),
     storyUrl: storyFor("Soul"),
     tags: ["Loyal", "Brave"],
     quote: "Little ones first. Always.",
